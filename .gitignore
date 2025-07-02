@@ -1,0 +1,29 @@
+# 二进制文件和构建产物
+/build/
+/docker-registry-manager
+
+# 数据目录 - 包含运行时生成的数据
+/data/
+
+# 配置文件 - 可能包含敏感信息
+/config.yaml
+
+# Go相关文件
+/go1.21.0.linux-amd64.tar.gz
+/vendor/
+*.o
+*.a
+*.so
+
+# 日志文件
+*.log
+
+# IDE配置文件
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# 操作系统文件
+Thumbs.db
+.DS_Store

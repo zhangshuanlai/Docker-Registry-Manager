@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{.Title}}</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="header-content">
+                <h1 class="title">
+                    <i class="fab fa-docker"></i>
+                    {{.Title}}
+                </h1>
+                <nav class="nav">
+                    <a href="/" class="nav-link active">
+                        <i class="fas fa-home"></i>
+                        首页
+                    </a>
+                    <a href="/repositories" class="nav-link">
+                        <i class="fas fa-archive"></i>
+                        仓库列表
+                    </a>
+                </nav>
+            </div>
+        </header>
+
+        <main class="main">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-archive"></i>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-number" id="repo-count">{{.Stats.RepositoryCount}}</div>
+                        <div class="stat-label">仓库数量</div>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-tags"></i>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-number" id="tag-count">{{.Stats.TotalTags}}</div>
+                        <div class="stat-label">标签总数</div>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-hdd"></i>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-number" id="total-size">{{.Stats.TotalSize}}</div>
+                        <div class="stat-label">存储大小</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-header">
+                    <h2 class="section-title">
+                        <i class="fas fa-archive"></i>
+                        最近的仓库
+                    </h2>
+                    <a href="/repositories" class="btn btn-primary">
+                        查看全部
+                        <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+
+                <div class="repositories-grid" id="repositories-grid">
+                    {{range .Repositories}}
+                    <div class="repo-card">
+                        <div class="repo-header">
+                            <h3 class="repo-name">
+                                <i class="fab fa-docker"></i>
+                                {{.Name}}
+                            </h3>
+                            <span class="repo-tag-count">{{.TagCount}} 个标签</span>
+                        </div>
+                        <div class="repo-actions">
+                            <a href="/repositories/{{.Name}}" class="btn btn-secondary">
+                                <i class="fas fa-eye"></i>
+                                查看详情
+                            </a>
+                        </div>
+                    </div>
+                    {{end}}
+                </div>
+
+                {{if eq (len .Repositories) 0}}
+                <div class="empty-state">
+                    <div class="empty-icon">
+                        <i class="fas fa-archive"></i>
+                    </div>
+                    <h3>暂无仓库</h3>
+                    <p>还没有推送任何Docker镜像到此仓库。</p>
+                    <div class="empty-help">
+                        <h4>开始使用：</h4>
+                        <pre><code>docker tag myimage:latest localhost:5000/myimage:latest
+docker push localhost:5000/myimage:latest</code></pre>
+                    </div>
+                </div>
+                {{end}}
+            </div>
+        </main>
+
+        <footer class="footer">
+            <p>&copy; 2025 Docker Registry Manager. 基于 Docker Registry API v2 构建。</p>
+        </footer>
+    </div>
+
+    <script src="/static/js/app.js"></script>
+</body>
+
+</html>

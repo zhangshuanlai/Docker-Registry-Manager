@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>仓库列表 - {{.Title}}</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="header-content">
+                <h1 class="title">
+                    <i class="fab fa-docker"></i>
+                    {{.Title}}
+                </h1>
+                <nav class="nav">
+                    <a href="/" class="nav-link">
+                        <i class="fas fa-home"></i>
+                        首页
+                    </a>
+                    <a href="/repositories" class="nav-link active">
+                        <i class="fas fa-archive"></i>
+                        仓库列表
+                    </a>
+                </nav>
+            </div>
+        </header>
+
+        <main class="main">
+            <div class="section">
+                <div class="section-header">
+                    <h2 class="section-title">
+                        <i class="fas fa-archive"></i>
+                        所有仓库 ({{len .Repositories}})
+                    </h2>
+                    <div class="search-box">
+                        <input type="text" id="search-input" placeholder="搜索仓库..." class="search-input">
+                        <i class="fas fa-search search-icon"></i>
+                    </div>
+                </div>
+
+                <div class="repositories-list" id="repositories-list">
+                    {{range .Repositories}}
+                    <div class="repo-item" data-name="{{.Name}}">
+                        <div class="repo-info">
+                            <div class="repo-name">
+                                <i class="fab fa-docker"></i>
+                                {{.Name}}
+                            </div>
+                            <div class="repo-meta">
+                                <span class="repo-tag-count">
+                                    <i class="fas fa-tags"></i>
+                                    {{.TagCount}} 个标签
+                                </span>
+                            </div>
+                        </div>
+                        <div class="repo-actions">
+                            <a href="/repositories/{{.Name}}" class="btn btn-primary">
+                                <i class="fas fa-eye"></i>
+                                查看详情
+                            </a>
+                            <button class="btn btn-secondary" onclick="copyPullCommand('{{.Name}}')">
+                                <i class="fas fa-copy"></i>
+                                复制拉取命令
+                            </button>
+                        </div>
+                    </div>
+                    {{end}}
+                </div>
+
+                {{if eq (len .Repositories) 0}}
+                <div class="empty-state">
+                    <div class="empty-icon">
+                        <i class="fas fa-archive"></i>
+                    </div>
+                    <h3>暂无仓库</h3>
+                    <p>还没有推送任何Docker镜像到此仓库。</p>
+                    <div class="empty-help">
+                        <h4>开始使用：</h4>
+                        <pre><code>docker tag myimage:latest localhost:5000/myimage:latest
+docker push localhost:5000/myimage:latest</code></pre>
+                    </div>
+                </div>
+                {{end}}
+            </div>
+        </main>
+
+        <footer class="footer">
+            <p>&copy; 2024 Docker Registry Manager. 基于 Docker Registry API v2 构建。</p>
+        </footer>
+    </div>
+
+    <!-- Toast notification -->
+    <div id="toast" class="toast">
+        <i class="fas fa-check-circle"></i>
+        <span id="toast-message">命令已复制到剪贴板</span>
+    </div>
+
+    <script src="/static/js/app.js"></script>
+    <script>
+        // Search functionality
+        document.getElementById('search-input').addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            const repoItems = document.querySelectorAll('.repo-item');
+            
+            repoItems.forEach(item => {
+                const repoName = item.dataset.name.toLowerCase();
+                if (repoName.includes(searchTerm)) {
+                    item.style.display = 'flex';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        });
+
+        // Copy pull command
+        function copyPullCommand(repoName) {
+            const command = `docker pull localhost:5000/${repoName}:latest`;
+            navigator.clipboard.writeText(command).then(() => {
+                showToast('拉取命令已复制到剪贴板');
+            }).catch(() => {
+                showToast('复制失败，请手动复制');
+            });
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            const toastMessage = document.getElementById('toast-message');
+            toastMessage.textContent = message;
+            toast.classList.add('show');
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
+

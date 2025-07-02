@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{.Repository.Name}} - {{.Title}}</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="header-content">
+                <h1 class="title">
+                    <i class="fab fa-docker"></i>
+                    {{.Title}}
+                </h1>
+                <nav class="nav">
+                    <a href="/" class="nav-link">
+                        <i class="fas fa-home"></i>
+                        首页
+                    </a>
+                    <a href="/repositories" class="nav-link">
+                        <i class="fas fa-archive"></i>
+                        仓库列表
+                    </a>
+                </nav>
+            </div>
+        </header>
+
+        <main class="main">
+            <div class="breadcrumb">
+                <a href="/repositories" class="breadcrumb-link">仓库列表</a>
+                <i class="fas fa-chevron-right"></i>
+                <span class="breadcrumb-current">{{.Repository.Name}}</span>
+            </div>
+
+            <div class="repo-header-section">
+                <div class="repo-title">
+                    <h2>
+                        <i class="fab fa-docker"></i>
+                        {{.Repository.Name}}
+                    </h2>
+                    <span class="repo-tag-count">{{.Repository.TagCount}} 个标签</span>
+                </div>
+                <div class="repo-actions">
+                    <button class="btn btn-primary" onclick="copyPullCommand('{{.Repository.Name}}', 'latest')">
+                        <i class="fas fa-download"></i>
+                        拉取最新版本
+                    </button>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-header">
+                    <h3 class="section-title">
+                        <i class="fas fa-tags"></i>
+                        标签列表
+                    </h3>
+                </div>
+
+                {{if .Repository.Tags}}
+                <div class="tags-table">
+                    <div class="table-header">
+                        <div class="table-cell">标签名称</div>
+                        <div class="table-cell">摘要</div>
+                        <div class="table-cell">操作</div>
+                    </div>
+                    {{range .Repository.Tags}}
+                    <div class="table-row">
+                        <div class="table-cell">
+                            <div class="tag-name">
+                                <i class="fas fa-tag"></i>
+                                {{.Name}}
+                            </div>
+                        </div>
+                        <div class="table-cell">
+                            <div class="digest">
+                                <code>{{.Digest}}</code>
+                                <button class="copy-btn" onclick="copyToClipboard('{{.Digest}}')" title="复制摘要">
+                                    <i class="fas fa-copy"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="table-cell">
+                            <div class="tag-actions">
+                                <button class="btn btn-sm btn-primary" onclick="copyPullCommand('{{$.Repository.Name}}', '{{.Name}}')">
+                                    <i class="fas fa-download"></i>
+                                    拉取
+                                </button>
+                                <button class="btn btn-sm btn-secondary" onclick="showManifest('{{$.Repository.Name}}', '{{.Name}}')">
+                                    <i class="fas fa-file-code"></i>
+                                    清单
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    {{end}}
+                </div>
+                {{else}}
+                <div class="empty-state">
+                    <div class="empty-icon">
+                        <i class="fas fa-tags"></i>
+                    </div>
+                    <h3>暂无标签</h3>
+                    <p>此仓库还没有任何标签。</p>
+                </div>
+                {{end}}
+            </div>
+
+            <div class="section">
+                <div class="section-header">
+                    <h3 class="section-title">
+                        <i class="fas fa-terminal"></i>
+                        使用说明
+                    </h3>
+                </div>
+                <div class="usage-guide">
+                    <div class="usage-item">
+                        <h4>拉取镜像</h4>
+                        <pre><code>docker pull localhost:5000/{{.Repository.Name}}:latest</code></pre>
+                    </div>
+                    <div class="usage-item">
+                        <h4>推送镜像</h4>
+                        <pre><code>docker tag myimage:latest localhost:5000/{{.Repository.Name}}:mytag
+docker push localhost:5000/{{.Repository.Name}}:mytag</code></pre>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer class="footer">
+            <p>&copy; 2024 Docker Registry Manager. 基于 Docker Registry API v2 构建。</p>
+        </footer>
+    </div>
+
+    <!-- Toast notification -->
+    <div id="toast" class="toast">
+        <i class="fas fa-check-circle"></i>
+        <span id="toast-message">已复制到剪贴板</span>
+    </div>
+
+    <!-- Manifest modal -->
+    <div id="manifest-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>镜像清单</h3>
+                <button class="modal-close" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <pre id="manifest-content"><code>加载中...</code></pre>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/js/app.js"></script>
+    <script>
+        function copyPullCommand(repoName, tag) {
+            const command = `docker pull localhost:5000/${repoName}:${tag}`;
+            copyToClipboard(command);
+            showToast(`拉取命令已复制: ${tag}`);
+        }
+
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                showToast('已复制到剪贴板');
+            }).catch(() => {
+                showToast('复制失败，请手动复制');
+            });
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            const toastMessage = document.getElementById('toast-message');
+            toastMessage.textContent = message;
+            toast.classList.add('show');
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        function showManifest(repoName, tag) {
+            const modal = document.getElementById('manifest-modal');
+            const content = document.getElementById('manifest-content');
+            
+            modal.style.display = 'flex';
+            content.innerHTML = '<code>加载中...</code>';
+            
+            // Fetch manifest from API
+            fetch(`/v2/${repoName}/manifests/${tag}`, {
+                headers: {
+                    'Accept': 'application/vnd.docker.distribution.manifest.v2+json'
+                }
+            })
+            .then(response => response.text())
+            .then(data => {
+                try {
+                    const formatted = JSON.stringify(JSON.parse(data), null, 2);
+                    content.innerHTML = `<code>${escapeHtml(formatted)}</code>`;
+                } catch (e) {
+                    content.innerHTML = `<code>${escapeHtml(data)}</code>`;
+                }
+            })
+            .catch(error => {
+                content.innerHTML = `<code>加载失败: ${error.message}</code>`;
+            });
+        }
+
+        function closeModal() {
+            document.getElementById('manifest-modal').style.display = 'none';
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('manifest-modal');
+            if (event.target === modal) {
+                closeModal();
+            }
+        }
+    </script>
+</body>
+</html>
+
