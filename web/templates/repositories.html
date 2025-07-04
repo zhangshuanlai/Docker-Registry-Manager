@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>仓库列表 - {{.Title}}</title>
     <link rel="stylesheet" href="/static/css/style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="/static/css/all.min.css">
 </head>
 
 <body>
@@ -63,10 +63,6 @@
                                 <i class="fas fa-eye"></i>
                                 查看详情
                             </a>
-                            <button class="btn btn-secondary" onclick="copyPullCommand('{{.Name}}')">
-                                <i class="fas fa-copy"></i>
-                                复制拉取命令
-                            </button>
                         </div>
                     </div>
                     {{end}}
@@ -116,27 +112,6 @@ docker push localhost:7000/myimage:latest</code></pre>
                 }
             });
         });
-
-        // Copy pull command
-        function copyPullCommand(repoName) {
-            const command = `docker pull localhost:7000/${repoName}:latest`;
-            navigator.clipboard.writeText(command).then(() => {
-                showToast('拉取命令已复制到剪贴板');
-            }).catch(() => {
-                showToast('复制失败，请手动复制');
-            });
-        }
-
-        function showToast(message) {
-            const toast = document.getElementById('toast');
-            const toastMessage = document.getElementById('toast-message');
-            toastMessage.textContent = message;
-            toast.classList.add('show');
-
-            setTimeout(() => {
-                toast.classList.remove('show');
-            }, 3000);
-        }
     </script>
 </body>
 

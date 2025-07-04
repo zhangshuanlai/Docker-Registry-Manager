@@ -24,6 +24,7 @@ type RepositoryData struct {
 	Name     string
 	TagCount int
 	Tags     []TagData
+	Latest   string
 }
 
 // TagData represents tag information for web display
@@ -139,6 +140,7 @@ func (r *Router) handleWebRepository(w http.ResponseWriter, req *http.Request) {
 		Name:     name,
 		TagCount: len(tags),
 		Tags:     tagData,
+		Latest:   ,
 	}
 
 	data := WebData{

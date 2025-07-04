@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{.Repository.Name}} - {{.Title}}</title>
     <link rel="stylesheet" href="/static/css/style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="/static/css/all.min.css">
 </head>
 
 <body>
@@ -45,6 +45,7 @@
                     </h2>
                     <span class="repo-tag-count">{{.Repository.TagCount}} 个标签</span>
                 </div>
+                {{.Repository.Tags}}
                 <div class="repo-actions">
                     <button class="btn btn-primary" onclick="copyPullCommand('{{.Repository.Name}}', 'latest')">
                         <i class="fas fa-download"></i>
@@ -122,19 +123,14 @@
                 <div class="usage-guide">
                     <div class="usage-item">
                         <h4>拉取镜像</h4>
-                        <pre><code>docker pull localhost:7000/{{.Repository.Name}}:latest</code></pre>
-                    </div>
-                    <div class="usage-item">
-                        <h4>推送镜像</h4>
-                        <pre><code>docker tag myimage:latest localhost:7000/{{.Repository.Name}}:mytag
-docker push localhost:7000/{{.Repository.Name}}:mytag</code></pre>
+                        <pre><code id="pull-command">docker pull {{.Repository.Name}}:tag</code></pre>
                     </div>
                 </div>
             </div>
         </main>
 
         <footer class="footer">
-            <p>&copy; 2024 Docker Registry Manager. 基于 Docker Registry API v2 构建。</p>
+            <p>&copy; 2024 Docker Registry Manager. 基于 Docker Registry API v2 标准构建。</p>
         </footer>
     </div>
 
@@ -160,17 +156,33 @@ docker push localhost:7000/{{.Repository.Name}}:mytag</code></pre>
     <script src="/static/js/app.js"></script>
     <script>
         function copyPullCommand(repoName, tag) {
-            const command = `docker pull localhost:7000/${repoName}:${tag}`;
+            const host = window.location.host;
+            const command = `docker pull ${host}/${repoName}:${tag}`;
             copyToClipboard(command);
             showToast(`拉取命令已复制: ${tag}`);
         }
 
         function copyToClipboard(text) {
-            navigator.clipboard.writeText(text).then(() => {
-                showToast('已复制到剪贴板');
-            }).catch(() => {
-                showToast('复制失败，请手动复制');
-            });
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(text).then(() => {
+                    showToast('已复制到剪贴板');
+                }).catch(() => {
+                    showToast('复制失败，请手动复制');
+                });
+            } else {
+                // 兼容旧浏览器
+                const textarea = document.createElement('textarea');
+                textarea.value = text;
+                document.body.appendChild(textarea);
+                textarea.select();
+                try {
+                    document.execCommand('copy');
+                    showToast('已复制到剪贴板');
+                } catch (err) {
+                    showToast('复制失败，请手动复制');
+                }
+                document.body.removeChild(textarea);
+            }
         }
 
         function showToast(message) {
@@ -228,6 +240,16 @@ docker push localhost:7000/{{.Repository.Name}}:mytag</code></pre>
                 closeModal();
             }
         }
+
+        window.addEventListener('DOMContentLoaded', function () {
+            const host = window.location.host;
+            const repoName = "{{.Repository.Name}}";
+            const pullCmd = `docker pull ${host}/${repoName}:latest`;
+            const pullCmdElem = document.getElementById('pull-command');
+            if (pullCmdElem) {
+                pullCmdElem.textContent = pullCmd;
+            }
+        });
     </script>
 </body>
 
