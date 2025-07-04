@@ -1,6 +1,8 @@
-# Docker Registry Manager
+# Mini Docker仓库管理器
 
-一个功能完整的Docker仓库管理器，类似于Nexus，支持Docker Registry API v2协议和直观的Web管理界面。
+用go语言编写的一个功能完整的Docker仓库管理器，类似于Nexus，支持Docker Registry API v2协议和直观的Web管理界面。
+
+特点就是简单好用，部署简单，不依赖任何环境，可以直接部署，也可以docker部署。
 
 功能还在建设中，欢迎提issue和PR，贡献。
 邮箱：1211038138@qq.com
