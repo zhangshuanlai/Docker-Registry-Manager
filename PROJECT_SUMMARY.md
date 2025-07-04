@@ -146,7 +146,7 @@ docker-registry-manager/
 ```yaml
 server:                           # 服务器配置
   host: "0.0.0.0"                # 监听地址
-  port: 5000                     # 监听端口
+  port: 7000                     # 监听端口
   read_timeout: 30s              # 读取超时
   write_timeout: 30s             # 写入超时
 

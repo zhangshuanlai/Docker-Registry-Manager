@@ -42,27 +42,27 @@ SERVER_PID=$!
 sleep 3
 
 # 检查服务是否正在运行
-if ! curl -s http://localhost:5000/v2/ > /dev/null; then
+if ! curl -s http://localhost:7000/v2/ > /dev/null; then
     echo "错误: 服务启动失败"
     kill $SERVER_PID 2>/dev/null
     exit 1
 fi
 
-echo "✓ 服务已启动在 http://localhost:5000"
+echo "✓ 服务已启动在 http://localhost:7000"
 echo
 
 echo "4. 测试API端点..."
 
 echo "  - 检查API版本支持:"
-curl -s http://localhost:5000/v2/ | head -1
+curl -s http://localhost:7000/v2/ | head -1
 echo
 
 echo "  - 获取仓库列表:"
-curl -s http://localhost:5000/v2/_catalog | jq . 2>/dev/null || curl -s http://localhost:5000/v2/_catalog
+curl -s http://localhost:7000/v2/_catalog | jq . 2>/dev/null || curl -s http://localhost:7000/v2/_catalog
 echo
 
 echo "  - 获取统计信息:"
-curl -s http://localhost:5000/api/stats | jq . 2>/dev/null || curl -s http://localhost:5000/api/stats
+curl -s http://localhost:7000/api/stats | jq . 2>/dev/null || curl -s http://localhost:7000/api/stats
 echo
 
 echo "✓ API测试完成"
@@ -71,7 +71,7 @@ echo
 echo "=== 演示完成 ==="
 echo
 echo "服务正在运行，您可以："
-echo "  • 访问 Web 界面: http://localhost:5000"
+echo "  • 访问 Web 界面: http://localhost:7000"
 echo "  • 查看 API 文档: 参考 README.md"
 echo "  • 测试 Docker 推送/拉取功能"
 echo
@@ -83,11 +83,11 @@ echo
 if command -v docker &> /dev/null; then
     echo "Docker 使用示例:"
     echo "  # 推送镜像"
-    echo "  docker tag hello-world localhost:5000/hello-world:latest"
-    echo "  docker push localhost:5000/hello-world:latest"
+    echo "  docker tag hello-world localhost:7000/hello-world:latest"
+    echo "  docker push localhost:7000/hello-world:latest"
     echo
     echo "  # 拉取镜像"
-    echo "  docker pull localhost:5000/hello-world:latest"
+    echo "  docker pull localhost:7000/hello-world:latest"
     echo
 fi
 

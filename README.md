@@ -36,6 +36,31 @@
 - Go 1.21+
 - Docker（用于测试）
 
+## windows使用
+```json
+{
+  "builder": {
+    "gc": {
+      "defaultKeepStorage": "20GB",
+      "enabled": true
+    }
+  },
+  "experimental": false,
+  "insecure-registries": [
+    "192.168.30.65:7000"
+  ]
+}
+```
+
+### 打包
+   ```bash
+  # 构建Linux可执行文件
+set CGO_ENABLED=0
+set GOOS=linux
+set GOARCH=amd64
+go build -a -installsuffix cgo -ldflags "-extldflags '-static'" -o build\docker-registry-manager ./cmd
+   ```
+
 ### 安装和运行
 
 1. **克隆项目**
@@ -59,7 +84,7 @@
    make run
    ```
 
-服务将在 `http://localhost:5000` 启动。
+服务将在 `http://localhost:7000` 启动。
 
 ### 配置
 
@@ -68,7 +93,7 @@
 ```yaml
 server:
   host: "0.0.0.0"
-  port: 5000
+  port: 7000
   read_timeout: 30s
   write_timeout: 30s
 
@@ -101,22 +126,26 @@ cors:
 
 ```bash
 # 标记镜像
-docker tag myimage:latest localhost:5000/myimage:latest
+docker tag myimage:latest localhost:7000/myimage:latest
+
+docker tag alpine:3.14 192.168.1.28:7000/alpine:3.14
 
 # 推送镜像
-docker push localhost:5000/myimage:latest
+docker push localhost:7000/myimage:latest
+
+docker push 192.168.1.28:7000/alpine:3.14
 ```
 
 ### 拉取镜像
 
 ```bash
 # 拉取镜像
-docker pull localhost:5000/myimage:latest
+docker pull localhost:7000/myimage:latest
 ```
 
 ### Web界面
 
-访问 `http://localhost:5000` 查看Web管理界面：
+访问 `http://localhost:7000` 查看Web管理界面：
 
 - **首页**: 显示统计信息和最近的仓库
 - **仓库列表**: 查看所有仓库和搜索功能
@@ -209,7 +238,7 @@ make release
    ```yaml
    server:
      host: "0.0.0.0"
-     port: 5000
+     port: 7000
    
    storage:
      path: "/var/lib/docker-registry"
@@ -240,7 +269,7 @@ WORKDIR /root/
 COPY --from=builder /app/build/docker-registry-manager .
 COPY --from=builder /app/config.yaml .
 COPY --from=builder /app/web ./web
-EXPOSE 5000
+EXPOSE 7000
 CMD ["./docker-registry-manager"]
 ```
 
@@ -248,7 +277,7 @@ CMD ["./docker-registry-manager"]
 
 ```bash
 docker build -t docker-registry-manager .
-docker run -p 5000:5000 -v /var/lib/registry:/root/data docker-registry-manager
+docker run -p 7000:7000 -v /var/lib/registry:/root/data docker-registry-manager
 ```
 
 ## 故障排除

@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
@@ -44,19 +43,19 @@ func NewFilesystemStorage(basePath string) (*FilesystemStorage, error) {
 // ListRepositories returns a list of all repositories
 func (fs *FilesystemStorage) ListRepositories() ([]string, error) {
 	repoPath := filepath.Join(fs.basePath, "repositories")
-	
+
 	var repositories []string
 	err := filepath.Walk(repoPath, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
 		}
-		
+
 		if info.IsDir() && path != repoPath {
 			relPath, err := filepath.Rel(repoPath, path)
 			if err != nil {
 				return err
 			}
-			
+
 			// Check if this directory contains manifests
 			manifestsPath := filepath.Join(path, "manifests")
 			if _, err := os.Stat(manifestsPath); err == nil {
@@ -65,54 +64,54 @@ func (fs *FilesystemStorage) ListRepositories() ([]string, error) {
 		}
 		return nil
 	})
-	
+
 	return repositories, err
 }
 
 // ListTags returns a list of tags for a repository
 func (fs *FilesystemStorage) ListTags(repository string) ([]string, error) {
 	tagsPath := filepath.Join(fs.basePath, "repositories", repository, "tags")
-	
+
 	if _, err := os.Stat(tagsPath); os.IsNotExist(err) {
 		return []string{}, nil
 	}
-	
-	files, err := ioutil.ReadDir(tagsPath)
+
+	files, err := os.ReadDir(tagsPath)
 	if err != nil {
 		return nil, err
 	}
-	
+
 	var tags []string
 	for _, file := range files {
 		if !file.IsDir() {
 			tags = append(tags, file.Name())
 		}
 	}
-	
+
 	return tags, nil
 }
 
 // GetTagDigest returns the digest for a tag
 func (fs *FilesystemStorage) GetTagDigest(repository, tag string) (string, error) {
 	tagPath := filepath.Join(fs.basePath, "repositories", repository, "tags", tag)
-	
-	data, err := ioutil.ReadFile(tagPath)
+
+	data, err := os.ReadFile(tagPath)
 	if err != nil {
 		return "", err
 	}
-	
+
 	return strings.TrimSpace(string(data)), nil
 }
 
 // PutTag creates or updates a tag
 func (fs *FilesystemStorage) PutTag(repository, tag, digest string) error {
 	tagPath := filepath.Join(fs.basePath, "repositories", repository, "tags", tag)
-	
+
 	if err := os.MkdirAll(filepath.Dir(tagPath), 0755); err != nil {
 		return err
 	}
-	
-	return ioutil.WriteFile(tagPath, []byte(digest), 0644)
+
+	return os.WriteFile(tagPath, []byte(digest), 0644)
 }
 
 // DeleteTag removes a tag
@@ -124,134 +123,134 @@ func (fs *FilesystemStorage) DeleteTag(repository, tag string) error {
 // GetManifest returns manifest data and media type
 func (fs *FilesystemStorage) GetManifest(repository, digest string) ([]byte, string, error) {
 	manifestPath := filepath.Join(fs.basePath, "repositories", repository, "manifests", digest)
-	
-	data, err := ioutil.ReadFile(manifestPath)
+
+	data, err := os.ReadFile(manifestPath)
 	if err != nil {
 		return nil, "", err
 	}
-	
+
 	// Read metadata
 	metaPath := manifestPath + ".meta"
 	var metadata struct {
 		MediaType string `json:"mediaType"`
 	}
-	
-	if metaData, err := ioutil.ReadFile(metaPath); err == nil {
+
+	if metaData, err := os.ReadFile(metaPath); err == nil {
 		json.Unmarshal(metaData, &metadata)
 	}
-	
+
 	if metadata.MediaType == "" {
 		metadata.MediaType = "application/vnd.docker.distribution.manifest.v2+json"
 	}
-	
+
 	return data, metadata.MediaType, nil
 }
 
 // GetManifestInfo returns manifest size and media type
 func (fs *FilesystemStorage) GetManifestInfo(repository, digest string) (int64, string, error) {
 	manifestPath := filepath.Join(fs.basePath, "repositories", repository, "manifests", digest)
-	
+
 	info, err := os.Stat(manifestPath)
 	if err != nil {
 		return 0, "", err
 	}
-	
+
 	// Read metadata
 	metaPath := manifestPath + ".meta"
 	var metadata struct {
 		MediaType string `json:"mediaType"`
 	}
-	
-	if metaData, err := ioutil.ReadFile(metaPath); err == nil {
+
+	if metaData, err := os.ReadFile(metaPath); err == nil {
 		json.Unmarshal(metaData, &metadata)
 	}
-	
+
 	if metadata.MediaType == "" {
 		metadata.MediaType = "application/vnd.docker.distribution.manifest.v2+json"
 	}
-	
+
 	return info.Size(), metadata.MediaType, nil
 }
 
 // PutManifest stores a manifest
 func (fs *FilesystemStorage) PutManifest(repository, digest string, data []byte, mediaType string) error {
 	manifestPath := filepath.Join(fs.basePath, "repositories", repository, "manifests", digest)
-	
+
 	if err := os.MkdirAll(filepath.Dir(manifestPath), 0755); err != nil {
 		return err
 	}
-	
+
 	// Write manifest data
-	if err := ioutil.WriteFile(manifestPath, data, 0644); err != nil {
+	if err := os.WriteFile(manifestPath, data, 0644); err != nil {
 		return err
 	}
-	
+
 	// Write metadata
 	metadata := struct {
 		MediaType string `json:"mediaType"`
 	}{
 		MediaType: mediaType,
 	}
-	
+
 	metaData, _ := json.Marshal(metadata)
 	metaPath := manifestPath + ".meta"
-	return ioutil.WriteFile(metaPath, metaData, 0644)
+	return os.WriteFile(metaPath, metaData, 0644)
 }
 
 // DeleteManifest removes a manifest
 func (fs *FilesystemStorage) DeleteManifest(repository, digest string) error {
 	manifestPath := filepath.Join(fs.basePath, "repositories", repository, "manifests", digest)
-	
+
 	// Remove manifest file
 	if err := os.Remove(manifestPath); err != nil {
 		return err
 	}
-	
+
 	// Remove metadata file
 	metaPath := manifestPath + ".meta"
 	os.Remove(metaPath) // Ignore error for metadata
-	
+
 	return nil
 }
 
 // GetBlob returns a blob reader and size
 func (fs *FilesystemStorage) GetBlob(digest string) (io.ReadCloser, int64, error) {
 	blobPath := fs.getBlobPath(digest)
-	
+
 	info, err := os.Stat(blobPath)
 	if err != nil {
 		return nil, 0, err
 	}
-	
+
 	file, err := os.Open(blobPath)
 	if err != nil {
 		return nil, 0, err
 	}
-	
+
 	return file, info.Size(), nil
 }
 
 // GetBlobSize returns the size of a blob
 func (fs *FilesystemStorage) GetBlobSize(digest string) (int64, error) {
 	blobPath := fs.getBlobPath(digest)
-	
+
 	info, err := os.Stat(blobPath)
 	if err != nil {
 		return 0, err
 	}
-	
+
 	return info.Size(), nil
 }
 
 // PutBlob stores a blob
 func (fs *FilesystemStorage) PutBlob(digest string, data []byte) error {
 	blobPath := fs.getBlobPath(digest)
-	
+
 	if err := os.MkdirAll(filepath.Dir(blobPath), 0755); err != nil {
 		return err
 	}
-	
-	return ioutil.WriteFile(blobPath, data, 0644)
+
+	return os.WriteFile(blobPath, data, 0644)
 }
 
 // DeleteBlob removes a blob
@@ -264,23 +263,23 @@ func (fs *FilesystemStorage) DeleteBlob(digest string) error {
 func (fs *FilesystemStorage) StartBlobUpload() (string, error) {
 	fs.mutex.Lock()
 	defer fs.mutex.Unlock()
-	
+
 	uploadID := fmt.Sprintf("%d", time.Now().UnixNano())
 	uploadPath := filepath.Join(fs.basePath, "uploads", uploadID)
-	
+
 	// Create upload file
 	file, err := os.Create(uploadPath)
 	if err != nil {
 		return "", err
 	}
 	file.Close()
-	
+
 	fs.uploads[uploadID] = &BlobUpload{
 		ID:       uploadID,
 		Size:     0,
 		FilePath: uploadPath,
 	}
-	
+
 	return uploadID, nil
 }
 
@@ -288,23 +287,23 @@ func (fs *FilesystemStorage) StartBlobUpload() (string, error) {
 func (fs *FilesystemStorage) AppendBlobUpload(uploadID string, data []byte) (int64, error) {
 	fs.mutex.Lock()
 	defer fs.mutex.Unlock()
-	
+
 	upload, exists := fs.uploads[uploadID]
 	if !exists {
 		return 0, fmt.Errorf("upload not found")
 	}
-	
+
 	file, err := os.OpenFile(upload.FilePath, os.O_APPEND|os.O_WRONLY, 0644)
 	if err != nil {
 		return 0, err
 	}
 	defer file.Close()
-	
+
 	n, err := file.Write(data)
 	if err != nil {
 		return 0, err
 	}
-	
+
 	upload.Size += int64(n)
 	return upload.Size, nil
 }
@@ -313,12 +312,12 @@ func (fs *FilesystemStorage) AppendBlobUpload(uploadID string, data []byte) (int
 func (fs *FilesystemStorage) GetBlobUploadStatus(uploadID string) (int64, error) {
 	fs.mutex.RLock()
 	defer fs.mutex.RUnlock()
-	
+
 	upload, exists := fs.uploads[uploadID]
 	if !exists {
 		return 0, fmt.Errorf("upload not found")
 	}
-	
+
 	return upload.Size, nil
 }
 
@@ -326,12 +325,12 @@ func (fs *FilesystemStorage) GetBlobUploadStatus(uploadID string) (int64, error)
 func (fs *FilesystemStorage) CompleteBlobUpload(uploadID, digest string, finalChunk []byte) error {
 	fs.mutex.Lock()
 	defer fs.mutex.Unlock()
-	
+
 	upload, exists := fs.uploads[uploadID]
 	if !exists {
 		return fmt.Errorf("upload not found")
 	}
-	
+
 	// Append final chunk if provided
 	if len(finalChunk) > 0 {
 		file, err := os.OpenFile(upload.FilePath, os.O_APPEND|os.O_WRONLY, 0644)
@@ -341,32 +340,32 @@ func (fs *FilesystemStorage) CompleteBlobUpload(uploadID, digest string, finalCh
 		file.Write(finalChunk)
 		file.Close()
 	}
-	
+
 	// Verify digest
-	data, err := ioutil.ReadFile(upload.FilePath)
+	data, err := os.ReadFile(upload.FilePath)
 	if err != nil {
 		return err
 	}
-	
+
 	hash := sha256.Sum256(data)
 	calculatedDigest := fmt.Sprintf("sha256:%x", hash)
 	if calculatedDigest != digest {
 		return fmt.Errorf("digest mismatch: expected %s, got %s", digest, calculatedDigest)
 	}
-	
+
 	// Move to blob storage
 	blobPath := fs.getBlobPath(digest)
 	if err := os.MkdirAll(filepath.Dir(blobPath), 0755); err != nil {
 		return err
 	}
-	
+
 	if err := os.Rename(upload.FilePath, blobPath); err != nil {
 		return err
 	}
-	
+
 	// Clean up upload
 	delete(fs.uploads, uploadID)
-	
+
 	return nil
 }
 
@@ -374,18 +373,18 @@ func (fs *FilesystemStorage) CompleteBlobUpload(uploadID, digest string, finalCh
 func (fs *FilesystemStorage) CancelBlobUpload(uploadID string) error {
 	fs.mutex.Lock()
 	defer fs.mutex.Unlock()
-	
+
 	upload, exists := fs.uploads[uploadID]
 	if !exists {
 		return fmt.Errorf("upload not found")
 	}
-	
+
 	// Remove upload file
 	os.Remove(upload.FilePath)
-	
+
 	// Clean up upload
 	delete(fs.uploads, uploadID)
-	
+
 	return nil
 }
 
@@ -393,8 +392,7 @@ func (fs *FilesystemStorage) CancelBlobUpload(uploadID string) error {
 func (fs *FilesystemStorage) getBlobPath(digest string) string {
 	// Remove sha256: prefix
 	hash := strings.TrimPrefix(digest, "sha256:")
-	
+
 	// Create directory structure: blobs/ab/cd/abcd...
 	return filepath.Join(fs.basePath, "blobs", hash[:2], hash[2:4], hash)
 }
-

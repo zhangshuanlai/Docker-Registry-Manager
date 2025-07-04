@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,6 +8,7 @@
     <link rel="stylesheet" href="/static/css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
+
 <body>
     <div class="container">
         <header class="header">
@@ -79,8 +81,8 @@
                     <p>还没有推送任何Docker镜像到此仓库。</p>
                     <div class="empty-help">
                         <h4>开始使用：</h4>
-                        <pre><code>docker tag myimage:latest localhost:5000/myimage:latest
-docker push localhost:5000/myimage:latest</code></pre>
+                        <pre><code>docker tag myimage:latest localhost:7000/myimage:latest
+docker push localhost:7000/myimage:latest</code></pre>
                     </div>
                 </div>
                 {{end}}
@@ -101,10 +103,10 @@ docker push localhost:5000/myimage:latest</code></pre>
     <script src="/static/js/app.js"></script>
     <script>
         // Search functionality
-        document.getElementById('search-input').addEventListener('input', function(e) {
+        document.getElementById('search-input').addEventListener('input', function (e) {
             const searchTerm = e.target.value.toLowerCase();
             const repoItems = document.querySelectorAll('.repo-item');
-            
+
             repoItems.forEach(item => {
                 const repoName = item.dataset.name.toLowerCase();
                 if (repoName.includes(searchTerm)) {
@@ -117,7 +119,7 @@ docker push localhost:5000/myimage:latest</code></pre>
 
         // Copy pull command
         function copyPullCommand(repoName) {
-            const command = `docker pull localhost:5000/${repoName}:latest`;
+            const command = `docker pull localhost:7000/${repoName}:latest`;
             navigator.clipboard.writeText(command).then(() => {
                 showToast('拉取命令已复制到剪贴板');
             }).catch(() => {
@@ -130,12 +132,12 @@ docker push localhost:5000/myimage:latest</code></pre>
             const toastMessage = document.getElementById('toast-message');
             toastMessage.textContent = message;
             toast.classList.add('show');
-            
+
             setTimeout(() => {
                 toast.classList.remove('show');
             }, 3000);
         }
     </script>
 </body>
-</html>
 
+</html>

@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,6 +8,7 @@
     <link rel="stylesheet" href="/static/css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
+
 <body>
     <div class="container">
         <header class="header">
@@ -84,11 +86,13 @@
                         </div>
                         <div class="table-cell">
                             <div class="tag-actions">
-                                <button class="btn btn-sm btn-primary" onclick="copyPullCommand('{{$.Repository.Name}}', '{{.Name}}')">
+                                <button class="btn btn-sm btn-primary"
+                                    onclick="copyPullCommand('{{$.Repository.Name}}', '{{.Name}}')">
                                     <i class="fas fa-download"></i>
                                     拉取
                                 </button>
-                                <button class="btn btn-sm btn-secondary" onclick="showManifest('{{$.Repository.Name}}', '{{.Name}}')">
+                                <button class="btn btn-sm btn-secondary"
+                                    onclick="showManifest('{{$.Repository.Name}}', '{{.Name}}')">
                                     <i class="fas fa-file-code"></i>
                                     清单
                                 </button>
@@ -118,12 +122,12 @@
                 <div class="usage-guide">
                     <div class="usage-item">
                         <h4>拉取镜像</h4>
-                        <pre><code>docker pull localhost:5000/{{.Repository.Name}}:latest</code></pre>
+                        <pre><code>docker pull localhost:7000/{{.Repository.Name}}:latest</code></pre>
                     </div>
                     <div class="usage-item">
                         <h4>推送镜像</h4>
-                        <pre><code>docker tag myimage:latest localhost:5000/{{.Repository.Name}}:mytag
-docker push localhost:5000/{{.Repository.Name}}:mytag</code></pre>
+                        <pre><code>docker tag myimage:latest localhost:7000/{{.Repository.Name}}:mytag
+docker push localhost:7000/{{.Repository.Name}}:mytag</code></pre>
                     </div>
                 </div>
             </div>
@@ -156,7 +160,7 @@ docker push localhost:5000/{{.Repository.Name}}:mytag</code></pre>
     <script src="/static/js/app.js"></script>
     <script>
         function copyPullCommand(repoName, tag) {
-            const command = `docker pull localhost:5000/${repoName}:${tag}`;
+            const command = `docker pull localhost:7000/${repoName}:${tag}`;
             copyToClipboard(command);
             showToast(`拉取命令已复制: ${tag}`);
         }
@@ -174,7 +178,7 @@ docker push localhost:5000/{{.Repository.Name}}:mytag</code></pre>
             const toastMessage = document.getElementById('toast-message');
             toastMessage.textContent = message;
             toast.classList.add('show');
-            
+
             setTimeout(() => {
                 toast.classList.remove('show');
             }, 3000);
@@ -183,28 +187,28 @@ docker push localhost:5000/{{.Repository.Name}}:mytag</code></pre>
         function showManifest(repoName, tag) {
             const modal = document.getElementById('manifest-modal');
             const content = document.getElementById('manifest-content');
-            
+
             modal.style.display = 'flex';
             content.innerHTML = '<code>加载中...</code>';
-            
+
             // Fetch manifest from API
             fetch(`/v2/${repoName}/manifests/${tag}`, {
                 headers: {
                     'Accept': 'application/vnd.docker.distribution.manifest.v2+json'
                 }
             })
-            .then(response => response.text())
-            .then(data => {
-                try {
-                    const formatted = JSON.stringify(JSON.parse(data), null, 2);
-                    content.innerHTML = `<code>${escapeHtml(formatted)}</code>`;
-                } catch (e) {
-                    content.innerHTML = `<code>${escapeHtml(data)}</code>`;
-                }
-            })
-            .catch(error => {
-                content.innerHTML = `<code>加载失败: ${error.message}</code>`;
-            });
+                .then(response => response.text())
+                .then(data => {
+                    try {
+                        const formatted = JSON.stringify(JSON.parse(data), null, 2);
+                        content.innerHTML = `<code>${escapeHtml(formatted)}</code>`;
+                    } catch (e) {
+                        content.innerHTML = `<code>${escapeHtml(data)}</code>`;
+                    }
+                })
+                .catch(error => {
+                    content.innerHTML = `<code>加载失败: ${error.message}</code>`;
+                });
         }
 
         function closeModal() {
@@ -218,7 +222,7 @@ docker push localhost:5000/{{.Repository.Name}}:mytag</code></pre>
         }
 
         // Close modal when clicking outside
-        window.onclick = function(event) {
+        window.onclick = function (event) {
             const modal = document.getElementById('manifest-modal');
             if (event.target === modal) {
                 closeModal();
@@ -226,5 +230,5 @@ docker push localhost:5000/{{.Repository.Name}}:mytag</code></pre>
         }
     </script>
 </body>
-</html>
 
+</html>

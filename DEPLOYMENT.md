@@ -21,7 +21,7 @@
 - **Go版本**: 1.21+
 - **内存**: 512MB RAM
 - **存储**: 1GB 可用空间
-- **网络**: 开放端口 5000（可配置）
+- **网络**: 开放端口 7000（可配置）
 
 ### 推荐配置
 - **内存**: 2GB+ RAM
@@ -46,8 +46,8 @@ make build
 
 ### 2. 访问服务
 
-- **Web界面**: http://localhost:5000
-- **API端点**: http://localhost:5000/v2/
+- **Web界面**: http://localhost:7000
+- **API端点**: http://localhost:7000/v2/
 
 ## 开发环境部署
 
@@ -87,7 +87,7 @@ make build
 ```yaml
 server:
   host: "0.0.0.0"
-  port: 5000
+  port: 7000
   read_timeout: 30s
   write_timeout: 30s
 
@@ -155,7 +155,7 @@ sudo chmod +x /opt/docker-registry-manager/docker-registry-manager
 ```yaml
 server:
   host: "0.0.0.0"
-  port: 5000
+  port: 7000
   read_timeout: 60s
   write_timeout: 60s
 
@@ -261,11 +261,11 @@ COPY --from=builder /app/config.yaml .
 RUN mkdir -p data/{blobs,repositories,uploads}
 
 # 暴露端口
-EXPOSE 5000
+EXPOSE 7000
 
 # 健康检查
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-  CMD wget --no-verbose --tries=1 --spider http://localhost:5000/v2/ || exit 1
+  CMD wget --no-verbose --tries=1 --spider http://localhost:7000/v2/ || exit 1
 
 # 启动命令
 CMD ["./docker-registry-manager"]
@@ -282,7 +282,7 @@ services:
   docker-registry-manager:
     build: .
     ports:
-      - "5000:5000"
+      - "7000:7000"
     volumes:
       - registry_data:/root/data
       - ./config.yaml:/root/config.yaml:ro
@@ -290,7 +290,7 @@ services:
       - REGISTRY_LOG_LEVEL=info
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:5000/v2/"]
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:7000/v2/"]
       interval: 30s
       timeout: 3s
       retries: 3
@@ -323,7 +323,7 @@ docker-compose logs -f
 
 ```nginx
 upstream docker-registry-manager {
-    server 127.0.0.1:5000;
+    server 127.0.0.1:7000;
 }
 
 server {
@@ -395,12 +395,12 @@ server {
     
     # 代理配置
     ProxyPreserveHost On
-    ProxyPass / http://127.0.0.1:5000/
-    ProxyPassReverse / http://127.0.0.1:5000/
+    ProxyPass / http://127.0.0.1:7000/
+    ProxyPassReverse / http://127.0.0.1:7000/
     
     # 设置头部
-    ProxyPassReverse / http://127.0.0.1:5000/
-    ProxyPassReverseMatch ^(.*) http://127.0.0.1:5000$1
+    ProxyPassReverse / http://127.0.0.1:7000/
+    ProxyPassReverseMatch ^(.*) http://127.0.0.1:7000$1
 </VirtualHost>
 ```
 
@@ -419,7 +419,7 @@ sudo ufw enable
 sudo iptables -A INPUT -p tcp --dport 22 -j ACCEPT
 sudo iptables -A INPUT -p tcp --dport 80 -j ACCEPT
 sudo iptables -A INPUT -p tcp --dport 443 -j ACCEPT
-sudo iptables -A INPUT -p tcp --dport 5000 -j DROP  # 阻止直接访问
+sudo iptables -A INPUT -p tcp --dport 7000 -j DROP  # 阻止直接访问
 ```
 
 ### 2. SSL/TLS 配置
@@ -481,11 +481,11 @@ metrics:
 
 ```bash
 # 简单健康检查
-curl -f http://localhost:5000/v2/ || exit 1
+curl -f http://localhost:7000/v2/ || exit 1
 
 # 详细健康检查脚本
 #!/bin/bash
-HEALTH_URL="http://localhost:5000/v2/"
+HEALTH_URL="http://localhost:7000/v2/"
 RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" $HEALTH_URL)
 
 if [ $RESPONSE -eq 200 ]; then
@@ -522,7 +522,7 @@ fi
 3. **端口冲突**
    ```bash
    # 检查端口占用
-   sudo netstat -tlnp | grep :5000
+   sudo netstat -tlnp | grep :7000
    
    # 修改配置文件中的端口
    ```

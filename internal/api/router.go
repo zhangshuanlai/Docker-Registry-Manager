@@ -5,6 +5,9 @@ import (
 	"docker-registry-manager/internal/storage"
 	"net/http"
 
+	"docker-registry-manager/web"
+	"io/fs"
+
 	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
 )
@@ -62,15 +65,20 @@ func (r *Router) setupRoutes() {
 		r.router.HandleFunc("/", r.handleWebIndex).Methods("GET")
 		r.router.HandleFunc("/repositories", r.handleWebRepositories).Methods("GET")
 		r.router.HandleFunc("/repositories/{name:.+}", r.handleWebRepository).Methods("GET")
-		
+
 		// API endpoints for AJAX
 		api := r.router.PathPrefix("/api").Subrouter()
 		api.HandleFunc("/repositories", r.handleAPIRepositories).Methods("GET")
 		api.HandleFunc("/stats", r.handleAPIStats).Methods("GET")
-		
+
 		// Static files
-		r.router.PathPrefix("/static/").Handler(http.StripPrefix("/static/", 
-			http.FileServer(http.Dir("./web/static/"))))
+		// 静态文件服务 - 使用嵌入的文件系统
+		staticFS, err := fs.Sub(web.EmbeddedAssets, "static")
+		if err != nil {
+			logrus.Fatalf("Failed to create static filesystem: %v", err)
+		}
+		r.router.PathPrefix("/static/").Handler(http.StripPrefix("/static/",
+			http.FileServer(http.FS(staticFS))))
 	}
 
 	// Add logging middleware
@@ -87,4 +95,3 @@ func (r *Router) loggingMiddleware(next http.Handler) http.Handler {
 		next.ServeHTTP(w, req)
 	})
 }
-
