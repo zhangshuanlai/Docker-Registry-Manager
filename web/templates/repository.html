@@ -45,7 +45,7 @@
                     </h2>
                     <span class="repo-tag-count">{{.Repository.TagCount}} 个标签</span>
                 </div>
-                {{.Repository.Tags}}
+                <!-- {{.Repository.Tags}} -->
                 <div class="repo-actions">
                     <button class="btn btn-primary" onclick="copyPullCommand('{{.Repository.Name}}', 'latest')">
                         <i class="fas fa-download"></i>
@@ -90,12 +90,12 @@
                                 <button class="btn btn-sm btn-primary"
                                     onclick="copyPullCommand('{{$.Repository.Name}}', '{{.Name}}')">
                                     <i class="fas fa-download"></i>
-                                    拉取
+                                    拉取命令
                                 </button>
                                 <button class="btn btn-sm btn-secondary"
                                     onclick="showManifest('{{$.Repository.Name}}', '{{.Name}}')">
                                     <i class="fas fa-file-code"></i>
-                                    清单
+                                    查看清单
                                 </button>
                             </div>
                         </div>

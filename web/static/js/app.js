@@ -6,6 +6,7 @@ const App = {
     config: {
         apiBase: '/api',
         refreshInterval: 30000, // 30 seconds
+        // ip: '192.168.30.65',
         port: 7000
     },
 
@@ -195,7 +196,8 @@ const App = {
 
 // Utility functions for global use
 window.copyPullCommand = function (repoName, tag = 'latest') {
-    const command = `docker pull localhost:${this.config.port}/${repoName}:${tag}`;
+    const host = window.location.host;
+    const command = `docker pull ${host}:${this.config.port}/${repoName}:${tag}`;
     App.copyToClipboard(command);
     App.showToast(`拉取命令已复制: ${tag}`);
 };

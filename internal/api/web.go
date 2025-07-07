@@ -4,8 +4,7 @@ import (
 	"encoding/json"
 	"html/template"
 	"net/http"
-
-	"docker-registry-manager/web"
+	"path/filepath"
 
 	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
@@ -24,7 +23,6 @@ type RepositoryData struct {
 	Name     string
 	TagCount int
 	Tags     []TagData
-	Latest   string
 }
 
 // TagData represents tag information for web display
@@ -140,7 +138,6 @@ func (r *Router) handleWebRepository(w http.ResponseWriter, req *http.Request) {
 		Name:     name,
 		TagCount: len(tags),
 		Tags:     tagData,
-		Latest:   ,
 	}
 
 	data := WebData{
@@ -153,11 +150,9 @@ func (r *Router) handleWebRepository(w http.ResponseWriter, req *http.Request) {
 
 // renderTemplate renders an HTML template
 func (r *Router) renderTemplate(w http.ResponseWriter, templateName string, data interface{}) {
-	// 修改模板路径，使用嵌入的文件系统
-	templatePath := "templates/" + templateName
-
-	// 使用ParseFS从嵌入文件系统加载模板
-	tmpl, err := template.ParseFS(web.EmbeddedAssets, templatePath)
+	templatePath := filepath.Join("web", "templates", templateName)
+	
+	tmpl, err := template.ParseFiles(templatePath)
 	if err != nil {
 		logrus.Errorf("Failed to parse template %s: %v", templateName, err)
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
@@ -228,3 +223,4 @@ func (r *Router) handleAPIStats(w http.ResponseWriter, req *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(stats)
 }
+
