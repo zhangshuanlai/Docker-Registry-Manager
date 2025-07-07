@@ -664,3 +664,202 @@ body {
         margin: 1rem;
     }
 }
+
+/* Login Card Styles */
+.login-card {
+    background: white;
+    padding: 2.5rem;
+    border-radius: 1rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    max-width: 450px;
+    margin: 3rem auto;
+    text-align: center;
+}
+
+.login-card h2 {
+    font-size: 2rem;
+    color: #1a202c;
+    margin-bottom: 2rem;
+}
+
+.form-group-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.form-group {
+    text-align: left;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: #4a5568;
+}
+
+.form-group input[type="text"],
+.form-group input[type="password"] {
+    width: 100%;
+    padding: 0.8rem 1rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.5rem;
+    font-size: 1rem;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.form-group input[type="text"]:focus,
+.form-group input[type="password"]:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+}
+
+.error-message {
+    color: #e53e3e;
+    margin-top: 1rem;
+    font-size: 0.9rem;
+}
+
+/* Form Control Styles */
+.form-control {
+    width: 100%;
+    padding: 0.8rem 1rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.5rem;
+    font-size: 1rem;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    box-sizing: border-box;
+    /* Ensure padding and border are included in the element's total width and height */
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+}
+
+/* Markdown Body Styles (for rendered content) */
+.markdown-body {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 1rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    line-height: 1.8;
+    color: #333;
+}
+
+.markdown-body h1,
+.markdown-body h2,
+.markdown-body h3,
+.markdown-body h4,
+.markdown-body h5,
+.markdown-body h6 {
+    color: #1a202c;
+    margin-top: 1.5em;
+    margin-bottom: 0.8em;
+    font-weight: 600;
+}
+
+.markdown-body h1 {
+    font-size: 2em;
+}
+
+.markdown-body h2 {
+    font-size: 1.75em;
+}
+
+.markdown-body h3 {
+    font-size: 1.5em;
+}
+
+.markdown-body h4 {
+    font-size: 1.25em;
+}
+
+.markdown-body p {
+    margin-bottom: 1em;
+}
+
+.markdown-body ul,
+.markdown-body ol {
+    margin-left: 1.5em;
+    margin-bottom: 1em;
+}
+
+.markdown-body li {
+    margin-bottom: 0.5em;
+}
+
+.markdown-body pre {
+    background-color: #f6f8fa;
+    border-radius: 0.5rem;
+    padding: 1em;
+    overflow-x: auto;
+    margin-bottom: 1em;
+}
+
+.markdown-body code {
+    font-family: 'Fira Code', 'Consolas', 'Monaco', 'Andale Mono', 'Ubuntu Mono', monospace;
+    background-color: #f0f0f0;
+    padding: 0.2em 0.4em;
+    border-radius: 0.3em;
+}
+
+.markdown-body pre code {
+    background-color: transparent;
+    padding: 0;
+    border-radius: 0;
+}
+
+.markdown-body a {
+    color: #667eea;
+    text-decoration: none;
+}
+
+.markdown-body a:hover {
+    text-decoration: underline;
+}
+
+.markdown-body img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin: 1em 0;
+}
+
+.markdown-body blockquote {
+    border-left: 4px solid #dfe2e5;
+    padding-left: 1em;
+    margin: 1em 0;
+    color: #6a737d;
+}
+
+.markdown-body table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 1em;
+}
+
+.markdown-body th,
+.markdown-body td {
+    border: 1px solid #e2e8f0;
+    padding: 0.8em;
+    text-align: left;
+}
+
+.markdown-body th {
+    background-color: #f6f8fa;
+    font-weight: 600;
+}
+
+/* Editor Actions */
+.editor-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    /* Space between buttons */
+    margin-top: 15px;
+}

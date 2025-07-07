@@ -6,7 +6,18 @@
 
 功能还在建设中，欢迎提issue和PR，贡献。
 邮箱：1211038138@qq.com
-![Docker Registry Manager界面截图](screenshot/screenshot_2025-07-02_09-31-40.png)
+## 截图
+登录
+![登录截图](screenshot/0.png)
+首页
+![首页截图](screenshot/1.png)
+仓库列表
+![仓库列表截图](screenshot/2.png)
+仓库详情1
+![仓库详情1截图](screenshot/3.png)
+仓库详情2
+![仓库详情2截图](screenshot/4.png)
+
 ## 特性
 
 ### 主要功能
@@ -57,34 +68,43 @@
 ### 打包
    ```bash
   # 构建Linux可执行文件
-set CGO_ENABLED=0
-set GOOS=linux
-set GOARCH=amd64
-go build -a -installsuffix cgo -ldflags "-extldflags '-static'" -o build\docker-registry-manager ./cmd
+    set CGO_ENABLED=0
+    set GOOS=linux
+    set GOARCH=amd64
+    go build -a -installsuffix cgo -o build\docker-registry-manager ./cmd
+   ```
+   window打包
+   ```bash
+   go build -a -installsuffix cgo -o build\docker-registry-manager.exe ./cmd
    ```
 
 ### 安装和运行
 
 1. **克隆项目**
-   ```bash
+```bash
    git clone <repository-url>
    cd docker-registry-manager
-   ```
+```
 
 2. **安装依赖**
-   ```bash
-   make install-deps
-   ```
+```bash
+  go mod tidy
+```
 
 3. **构建项目**
-   ```bash
-   make build
-   ```
+```bash
+  go build -o build/docker-registry-manager ./cmd
+```
 
 4. **运行服务**
-   ```bash
-   make run
-   ```
+```bash
+  go run build/docker-registry-manager -config=config.yaml
+```
+5. **开发**
+
+```bash
+  go run ./cmd
+```
 
 服务将在 `http://localhost:7000` 启动。
 
@@ -113,13 +133,19 @@ logging:
   
 web:
   enabled: true
-  title: "Docker Registry Manager"
+  title: "Mini Docker仓库管理器"
+auth:
+  enabled: true
+  username: admin
+  password: admin
   
 cors:
   enabled: true
   allowed_origins: ["*"]
   allowed_methods: ["GET", "POST", "PUT", "DELETE", "HEAD", "OPTIONS"]
   allowed_headers: ["*"]
+
+
 ```
 
 ## 使用方法
@@ -196,66 +222,18 @@ docker-registry-manager/
 └── README.md
 ```
 
-### 开发命令
-
-```bash
-# 设置开发环境
-make setup
-
-# 安装依赖
-make install-deps
-
-# 构建项目
-make build
-
-# 运行项目
-make run
-
-# 运行测试
-make test
-
-# 清理构建文件
-make clean
-
-# 创建发布版本
-make release
-```
-
-### 添加新功能
-
-1. **API端点**: 在 `internal/api/` 目录下添加新的处理器
-2. **存储功能**: 在 `internal/storage/` 目录下扩展存储接口
-3. **Web界面**: 在 `web/templates/` 和 `web/static/` 目录下添加新的页面和资源
-
 ## 部署
 
-### 生产环境部署
+### 1.windows部署
+1. 创建 `config.yaml` 文件，并配置好参数。
+2. 双击docker-registry-manager.exe。
 
-1. **构建发布版本**
-   ```bash
-   make release
-   ```
+### 2.Linux部署
+1. 创建 `config.yaml` 文件，并配置好参数。
+2. 运行 ./docer-registry-manager 。
 
-2. **配置生产环境**
-   ```yaml
-   server:
-     host: "0.0.0.0"
-     port: 7000
-   
-   storage:
-     path: "/var/lib/docker-registry"
-   
-   logging:
-     level: "warn"
-     format: "json"
-   ```
 
-3. **运行服务**
-   ```bash
-   ./build/docker-registry-manager -config production.yaml
-   ```
-
-### Docker部署
+### 3.Docker部署
 
 创建 `Dockerfile`:
 
@@ -270,7 +248,6 @@ RUN apk --no-cache add ca-certificates
 WORKDIR /root/
 COPY --from=builder /app/build/docker-registry-manager .
 COPY --from=builder /app/config.yaml .
-COPY --from=builder /app/web ./web
 EXPOSE 7000
 CMD ["./docker-registry-manager"]
 ```

@@ -2,11 +2,18 @@ package config
 
 import (
 	"fmt"
-	"io/ioutil"
+	"os"
 	"time"
 
 	"gopkg.in/yaml.v2"
 )
+
+// 添加认证配置
+type AuthConfig struct {
+	Enabled  bool   `yaml:"enabled"`
+	Username string `yaml:"username"`
+	Password string `yaml:"password"` // 建议存储哈希值
+}
 
 // Config represents the application configuration
 type Config struct {
@@ -16,6 +23,7 @@ type Config struct {
 	Logging  LoggingConfig  `yaml:"logging"`
 	Web      WebConfig      `yaml:"web"`
 	CORS     CORSConfig     `yaml:"cors"`
+	Auth     AuthConfig     `yaml:"auth"` // 添加这行
 }
 
 // ServerConfig contains server-related configuration
@@ -60,7 +68,7 @@ type CORSConfig struct {
 
 // LoadConfig loads configuration from a YAML file
 func LoadConfig(filename string) (*Config, error) {
-	data, err := ioutil.ReadFile(filename)
+	data, err := os.ReadFile(filename)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read config file: %w", err)
 	}
@@ -77,4 +85,3 @@ func LoadConfig(filename string) (*Config, error) {
 func (c *Config) GetAddress() string {
 	return fmt.Sprintf("%s:%d", c.Server.Host, c.Server.Port)
 }
-

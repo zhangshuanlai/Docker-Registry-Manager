@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8">
+  <title>登录 - {{.Title}}</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+
+<body>
+  <div class="container">
+    <header class="header">
+      <div class="header-content">
+        <a href="/" class="title" style="color:white; text-decoration: none;">
+          <i class="fas fa-boxes"></i>{{.Title}}
+        </a>
+      </div>
+    </header>
+    <main class="main">
+      <div class="login-card">
+        <h2>用户登录</h2>
+        <form id="login-form" class="form-group-stack">
+          <div class="form-group">
+            <label for="username">用户名：</label>
+            <input type="text" id="username" name="username" required>
+          </div>
+          <div class="form-group">
+            <label for="password">密码：</label>
+            <input type="password" id="password" name="password" required>
+          </div>
+          <button type="submit" class="btn btn-primary">登录</button>
+        </form>
+        <div id="login-error" class="error-message"></div>
+      </div>
+    </main>
+    <footer class="footer">
+      <p>&copy; 2025 {{.Title}}. 基于 Docker Registry API v2 标准构建。</p>
+    </footer>
+  </div>
+  <script src="/static/js/app.js"></script>
+  <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+</body>
+
+</html>

@@ -26,6 +26,21 @@
                         <i class="fas fa-archive"></i>
                         仓库列表
                     </a>
+                    {{if .IsLoggedIn}}
+                    <span class="nav-link">
+                        <i class="fas fa-user"></i>
+                        欢迎, {{.Username}}!
+                    </span>
+                    <a href="#" id="logout-btn" class="nav-link">
+                        <i class="fas fa-sign-out-alt"></i>
+                        登出
+                    </a>
+                    {{else}}
+                    <a href="/login" class="nav-link">
+                        <i class="fas fa-sign-in-alt"></i>
+                        登录
+                    </a>
+                    {{end}}
                 </nav>
             </div>
         </header>
@@ -127,10 +142,42 @@
                     </div>
                 </div>
             </div>
+
+            <div class="section">
+                <div class="section-header">
+                    <h3 class="section-title">
+                        <i class="fas fa-file-alt"></i>
+                        仓库说明
+                    </h3>
+                    {{if .IsLoggedIn}}
+                    <button id="edit-description-btn" class="btn btn-primary btn-sm">
+                        <i class="fas fa-edit"></i> 编辑
+                    </button>
+                    {{end}}
+                </div>
+                <div class="description-content">
+                    <div id="description-display" class="markdown-body">
+                        {{if .RepositoryDescription}}
+                        <div id="rendered-description" data-raw-description="{{.RepositoryDescription}}"></div>
+                        {{else}}
+                        <p>此仓库暂无说明。</p>
+                        {{end}}
+                    </div>
+                    <div id="description-editor-container" style="display:none;">
+                        <textarea id="description-editor" class="form-control" rows="15"></textarea>
+                        <div class="editor-actions" style="margin-top: 10px;">
+                            <button id="save-description-btn" class="btn btn-primary">保存</button>
+                            <button id="cancel-description-btn" class="btn btn-secondary"
+                                style="margin-left: 10px;">取消</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
         </main>
 
         <footer class="footer">
-            <p>&copy; 2024 Docker Registry Manager. 基于 Docker Registry API v2 标准构建。</p>
+            <p>&copy; 2025 {{.Title}}. 基于 Docker Registry API v2 标准构建。</p>
         </footer>
     </div>
 
@@ -154,6 +201,7 @@
     </div>
 
     <script src="/static/js/app.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script>
         function copyPullCommand(repoName, tag) {
             const host = window.location.host;
@@ -247,7 +295,7 @@
             const pullCmd = `docker pull ${host}/${repoName}:latest`;
             const pullCmdElem = document.getElementById('pull-command');
             if (pullCmdElem) {
-                pullCmdElem.textContent = pullCmd;
+                pullCmdElem.textContent = pud;
             }
         });
     </script>

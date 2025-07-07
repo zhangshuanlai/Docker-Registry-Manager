@@ -14,6 +14,7 @@ const App = {
     init() {
         this.setupEventListeners();
         this.startAutoRefresh();
+        this.initDescriptionEditor();
         console.log('Docker Registry Manager initialized');
     },
 
@@ -26,6 +27,11 @@ const App = {
                 const button = e.target.closest('.copy-btn');
                 const text = button.getAttribute('data-copy') || button.previousElementSibling.textContent;
                 this.copyToClipboard(text);
+            }
+            // Handle logout button
+            if (e.target.id === 'logout-btn') {
+                e.preventDefault();
+                this.handleLogout();
             }
         });
 
@@ -191,6 +197,101 @@ const App = {
         if (hours > 0) return `${hours} 小时前`;
         if (minutes > 0) return `${minutes} 分钟前`;
         return '刚刚';
+    },
+
+    // Handle logout
+    async handleLogout() {
+        try {
+            const resp = await fetch('/api/logout', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            });
+            if (resp.ok) {
+                window.location.href = '/'; // 登出后跳转到主页
+            } else {
+                this.showToast('登出失败', 'error');
+            }
+        } catch (err) {
+            this.showToast('网络错误，登出失败', 'error');
+        }
+    },
+
+    // Initialize repository description editor
+    initDescriptionEditor() {
+        const repoNameMatch = window.location.pathname.match(/\/repositories\/([^/]+)/);
+        if (!repoNameMatch) return; // Not on a repository page
+
+        const repoName = repoNameMatch[1];
+
+        const renderedDescriptionDiv = document.getElementById('rendered-description');
+        const descriptionDisplay = document.getElementById('description-display');
+        const descriptionEditorContainer = document.getElementById('description-editor-container');
+        const descriptionEditor = document.getElementById('description-editor');
+        const editButton = document.getElementById('edit-description-btn');
+        const saveButton = document.getElementById('save-description-btn');
+        const cancelButton = document.getElementById('cancel-description-btn');
+
+        let currentDescription = ""; // Store the current raw Markdown
+
+        // Function to render and display description
+        const renderAndDisplay = (markdown) => {
+            if (renderedDescriptionDiv) {
+                renderedDescriptionDiv.innerHTML = marked.parse(markdown);
+                descriptionDisplay.style.display = 'block';
+                descriptionEditorContainer.style.display = 'none';
+                currentDescription = markdown; // Update current raw description
+                // Update the data-raw-description attribute if needed (e.g., after save)
+                if (renderedDescriptionDiv.dataset.rawDescription !== undefined) {
+                    renderedDescriptionDiv.dataset.rawDescription = markdown;
+                }
+            }
+        };
+
+        // Initial render if description exists
+        if (renderedDescriptionDiv && renderedDescriptionDiv.dataset.rawDescription !== undefined) {
+            const initialDescription = renderedDescriptionDiv.dataset.rawDescription;
+            renderAndDisplay(initialDescription);
+        }
+
+        // Event listener for Edit button
+        if (editButton) {
+            editButton.addEventListener('click', () => {
+                descriptionEditor.value = currentDescription;
+                descriptionDisplay.style.display = 'none';
+                descriptionEditorContainer.style.display = 'block';
+            });
+        }
+
+        // Event listener for Save button
+        if (saveButton) {
+            saveButton.addEventListener('click', async () => {
+                const newDescription = descriptionEditor.value;
+                try {
+                    const response = await fetch(`${App.config.apiBase}/repositories/${repoName}/description`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'text/plain' }, // Send as plain text
+                        body: newDescription
+                    });
+
+                    if (response.ok) {
+                        App.showToast('仓库说明已保存', 'success');
+                        renderAndDisplay(newDescription);
+                    } else {
+                        const errorText = await response.text();
+                        App.showToast(`保存失败: ${errorText || response.statusText}`, 'error');
+                    }
+                } catch (error) {
+                    App.showToast(`网络错误，保存失败: ${error.message}`, 'error');
+                }
+            });
+        }
+
+        // Event listener for Cancel button
+        if (cancelButton) {
+            cancelButton.addEventListener('click', () => {
+                renderAndDisplay(currentDescription); // Revert to original and display
+            });
+        }
     }
 };
 
@@ -245,6 +346,32 @@ document.addEventListener('DOMContentLoaded', () => {
     // Setup search if search input exists
     if (document.getElementById('search-input')) {
         setupSearch('search-input', '.repo-item', 'data-name');
+    }
+
+    // 登录表单提交逻辑
+    if (document.getElementById('login-form')) {
+        document.getElementById('login-form').addEventListener('submit', async function (e) {
+            e.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const errorDiv = document.getElementById('login-error');
+            errorDiv.textContent = '';
+            try {
+                const resp = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+                if (resp.ok) {
+                    window.location.href = '/';
+                } else {
+                    const msg = resp.status === 401 ? '用户名或密码错误' : '登录失败';
+                    errorDiv.textContent = msg;
+                }
+            } catch (err) {
+                errorDiv.textContent = '网络错误，请重试';
+            }
+        });
     }
 });
 

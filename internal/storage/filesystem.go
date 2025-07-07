@@ -26,6 +26,7 @@ func NewFilesystemStorage(basePath string) (*FilesystemStorage, error) {
 		filepath.Join(basePath, "blobs"),
 		filepath.Join(basePath, "repositories"),
 		filepath.Join(basePath, "uploads"),
+		filepath.Join(basePath, "descriptions"),
 	}
 
 	for _, dir := range dirs {
@@ -395,4 +396,52 @@ func (fs *FilesystemStorage) getBlobPath(digest string) string {
 
 	// Create directory structure: blobs/ab/cd/abcd...
 	return filepath.Join(fs.basePath, "blobs", hash[:2], hash[2:4], hash)
+}
+
+// GetRepositoryDescription returns the description for a repository
+func (fs *FilesystemStorage) GetRepositoryDescription(repository string) (string, error) {
+	descPath := filepath.Join(fs.basePath, "descriptions", repository+".md")
+
+	data, err := os.ReadFile(descPath)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return "", nil // Return empty string if description file does not exist
+		}
+		return "", err
+	}
+
+	return string(data), nil
+}
+
+// PutRepositoryDescription saves the description for a repository
+func (fs *FilesystemStorage) PutRepositoryDescription(repository string, description string) error {
+	descPath := filepath.Join(fs.basePath, "descriptions", repository+".md")
+
+	if err := os.MkdirAll(filepath.Dir(descPath), 0755); err != nil {
+		return err
+	}
+
+	return os.WriteFile(descPath, []byte(description), 0644)
+}
+
+// GetTotalStorageSize calculates the total size of the storage directory
+func (fs *FilesystemStorage) GetTotalStorageSize() (int64, error) {
+	var totalSize int64
+	err := filepath.Walk(fs.basePath, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			// Log the error but continue walking for other files
+			fmt.Fprintf(os.Stderr, "Error accessing path %s: %v\n", path, err)
+			return nil // Do not stop walking for this error
+		}
+
+		if !info.IsDir() {
+			totalSize += info.Size()
+		}
+		return nil
+	})
+	if err != nil {
+		return 0, fmt.Errorf("failed to calculate total storage size: %w", err)
+	}
+
+	return totalSize, nil
 }

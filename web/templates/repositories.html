@@ -26,6 +26,21 @@
                         <i class="fas fa-archive"></i>
                         仓库列表
                     </a>
+                    {{if .IsLoggedIn}}
+                    <span class="nav-link">
+                        <i class="fas fa-user"></i>
+                        欢迎, {{.Username}}!
+                    </span>
+                    <a href="#" id="logout-btn" class="nav-link">
+                        <i class="fas fa-sign-out-alt"></i>
+                        登出
+                    </a>
+                    {{else}}
+                    <a href="/login" class="nav-link">
+                        <i class="fas fa-sign-in-alt"></i>
+                        登录
+                    </a>
+                    {{end}}
                 </nav>
             </div>
         </header>
@@ -86,7 +101,7 @@ docker push localhost:7000/myimage:latest</code></pre>
         </main>
 
         <footer class="footer">
-            <p>&copy; 2024 Docker Registry Manager. 基于 Docker Registry API v2 构建。</p>
+            <p>&copy; 2025 {{.Title}}. 基于 Docker Registry API v2 标准构建。</p>
         </footer>
     </div>
 
